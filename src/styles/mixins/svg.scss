@@ -1,0 +1,22 @@
+@use 'sass:string';
+
+// ----------------------
+// template
+@mixin temp($type, $name, $aspect) {
+  display: block;
+  aspect-ratio: string.unquote($aspect);
+  #{$type}: url('/svgs/#{$name}.svg') 50% 50% / contain no-repeat;
+}
+
+@mixin background($name, $aspect) {
+  @include temp(background, $name, $aspect);
+}
+
+@mixin mask($name, $aspect) {
+  @include temp(mask, $name, $aspect);
+}
+
+// ----------------------
+@mixin list-circle {
+  @include background(list-circle, '6 / 6');
+}
