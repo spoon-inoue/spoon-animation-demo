@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { three } from './core/Three'
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
+// import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { gui } from './Gui'
 
 export class Canvas {
