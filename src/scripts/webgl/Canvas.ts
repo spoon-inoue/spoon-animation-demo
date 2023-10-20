@@ -49,6 +49,7 @@ export class Canvas {
       'eye_color.jpg',
       'hair_eyebrows_color.jpg',
       'shoes_color.jpg',
+      'cap_color.jpg',
     ]
 
     return await Promise.all(
@@ -136,6 +137,8 @@ export class Canvas {
           material.map = findTexture('hair_eyebrows_color')
         } else if (name === 'shoes') {
           material.map = findTexture('shoes_color')
+        } else if (name === 'cap') {
+          material.map = findTexture('cap_color')
         }
       }
     })
