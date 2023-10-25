@@ -5,7 +5,7 @@ import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { gui } from './Gui'
 
 export class Canvas {
-  private animation: { mixer?: THREE.AnimationMixer; actions?: { name: string; action: THREE.AnimationAction }[] } = {}
+  private animation: { mixer?: THREE.AnimationMixer; actions?: { name: string; action: THREE.AnimationAction }[]; morphingMesh?: THREE.Mesh } = {}
   private lights = new THREE.Group()
   private helpers = new THREE.Group()
 
@@ -107,9 +107,6 @@ export class Canvas {
     const model = gltf.scene
     three.scene.add(model)
 
-    console.log(model)
-    console.log(textures)
-
     const findTexture = (findName: string) => {
       return textures.find(({ name }) => name === findName)!
     }
@@ -125,7 +122,10 @@ export class Canvas {
         const name = child.name
 
         if (name === 'body') {
+          // console.log(child)
+          // child.morphTargetInfluences![0] = 1
           material.map = findTexture('face_hand_color')
+          this.animation.morphingMesh = child
         } else if (name === 'wear') {
           material.map = findTexture('t-shirts_color')
           material.normalMap = findTexture('t-shirts_normal')
@@ -177,26 +177,21 @@ export class Canvas {
   private setGui() {
     gui.add(this.helpers, 'visible').name('helpers')
 
+    let folder = gui.addFolder('bone animations')
+
     this.animation.actions?.forEach((anime) => {
-      gui.add(anime.action, 'weight', 0, 1, 0.01).name(anime.name)
+      folder.add(anime.action, 'weight', 0, 1, 0.01).name(anime.name)
     })
 
-    // this.animation.actions?.forEach((anime) => {
-    //   const obj = {
-    //     play: () => {
-    //       anime.action.reset()
-    //       anime.action.play()
-    //     },
-    //     loop: true,
-    //   }
+    folder = gui.addFolder('morphing animations')
 
-    //   const folder = gui.addFolder(anime.name)
-    //   folder.add(anime.action, 'weight', 0, 1, 0.01)
-    //   folder.add(obj, 'loop').onChange((v: boolean) => {
-    //     anime.action.loop = v ? THREE.LoopRepeat : THREE.LoopOnce
-    //   })
-    //   folder.add(obj, 'play')
-    // })
+    const morphTargetInfluences = this.animation.morphingMesh?.morphTargetInfluences
+    if (morphTargetInfluences) {
+      folder.add(morphTargetInfluences, '0', 0, 1, 0.01).name('eye left')
+      folder.add(morphTargetInfluences, '1', 0, 1, 0.01).name('eye right')
+      folder.add(morphTargetInfluences, '2', 0, 1, 0.01).name('mouse a')
+      folder.add(morphTargetInfluences, '3', 0, 1, 0.01).name('mouse o')
+    }
   }
 
   private anime = () => {
