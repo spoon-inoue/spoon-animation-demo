@@ -177,20 +177,24 @@ export class Canvas {
   private setGui() {
     gui.add(this.helpers, 'visible').name('helpers')
 
-    let folder = gui.addFolder('bone animations')
+    gui.add(this.animation.mixer!, 'timeScale', 0, 2, 0.01).name('time scale')
 
-    this.animation.actions?.forEach((anime) => {
-      folder.add(anime.action, 'weight', 0, 1, 0.01).name(anime.name)
-    })
+    {
+      const folder = gui.addFolder('bone animations')
+      this.animation.actions?.forEach((anime) => {
+        folder.add(anime.action, 'weight', 0, 1, 0.01).name(anime.name)
+      })
+    }
 
-    folder = gui.addFolder('morphing animations')
-
-    const morphTargetInfluences = this.animation.morphingMesh?.morphTargetInfluences
-    if (morphTargetInfluences) {
-      folder.add(morphTargetInfluences, '0', 0, 1, 0.01).name('eye left')
-      folder.add(morphTargetInfluences, '1', 0, 1, 0.01).name('eye right')
-      folder.add(morphTargetInfluences, '2', 0, 1, 0.01).name('mouse a')
-      folder.add(morphTargetInfluences, '3', 0, 1, 0.01).name('mouse o')
+    {
+      const folder = gui.addFolder('morphing animations')
+      const morphTargetInfluences = this.animation.morphingMesh?.morphTargetInfluences
+      if (morphTargetInfluences) {
+        folder.add(morphTargetInfluences, '0', 0, 1, 0.01).name('eye left')
+        folder.add(morphTargetInfluences, '1', 0, 1, 0.01).name('eye right')
+        folder.add(morphTargetInfluences, '2', 0, 1, 0.01).name('mouse a')
+        folder.add(morphTargetInfluences, '3', 0, 1, 0.01).name('mouse o')
+      }
     }
   }
 
