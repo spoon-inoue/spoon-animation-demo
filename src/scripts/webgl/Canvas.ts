@@ -5,7 +5,9 @@ import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { gui } from './Gui'
 
 export class Canvas {
-  private animation: { mixer?: THREE.AnimationMixer; actions?: { name: string; action: THREE.AnimationAction }[]; morphingMesh?: THREE.Mesh } = {}
+  private animation: { mixer?: THREE.AnimationMixer; actions?: { name: string; action: THREE.AnimationAction }[]; morphingMeshes: THREE.Mesh[] } = {
+    morphingMeshes: [],
+  }
   private lights = new THREE.Group()
   private helpers = new THREE.Group()
 
@@ -47,6 +49,7 @@ export class Canvas {
       't-shirts_normal.jpg',
       'bottom_color.jpg',
       'eye_color.jpg',
+      'eyelashes_color.jpg',
       'hair_eyebrows_color.jpg',
       'shoes_color.jpg',
       'cap_color.jpg',
@@ -88,10 +91,10 @@ export class Canvas {
     three.scene.add(this.lights)
 
     const ambient = new THREE.AmbientLight()
-    ambient.intensity = 0.5
+    ambient.intensity = 1
     this.lights.add(ambient)
 
-    const directional = new THREE.DirectionalLight('#fff', 1.0)
+    const directional = new THREE.DirectionalLight('#fff', 1)
     directional.position.set(3, 4, 5)
     directional.castShadow = true
     directional.shadow.mapSize.set(2048, 2048)
@@ -122,10 +125,8 @@ export class Canvas {
         const name = child.name
 
         if (name === 'body') {
-          // console.log(child)
-          // child.morphTargetInfluences![0] = 1
           material.map = findTexture('face_hand_color')
-          this.animation.morphingMesh = child
+          this.animation.morphingMeshes.push(child)
         } else if (name === 'wear') {
           material.map = findTexture('t-shirts_color')
           material.normalMap = findTexture('t-shirts_normal')
@@ -133,6 +134,9 @@ export class Canvas {
           material.map = findTexture('bottom_color')
         } else if (name === 'eye') {
           material.map = findTexture('eye_color')
+        } else if (name === 'eyelashes') {
+          this.animation.morphingMeshes.push(child)
+          material.map = findTexture('eyelashes_color')
         } else if (['eyebrows', 'hairFront', 'hairBack'].includes(name)) {
           material.map = findTexture('hair_eyebrows_color')
         } else if (name === 'shoes') {
@@ -188,13 +192,29 @@ export class Canvas {
 
     {
       const folder = gui.addFolder('morphing animations')
-      const morphTargetInfluences = this.animation.morphingMesh?.morphTargetInfluences
-      if (morphTargetInfluences) {
-        folder.add(morphTargetInfluences, '0', 0, 1, 0.01).name('eye left')
-        folder.add(morphTargetInfluences, '1', 0, 1, 0.01).name('eye right')
-        folder.add(morphTargetInfluences, '2', 0, 1, 0.01).name('mouse a')
-        folder.add(morphTargetInfluences, '3', 0, 1, 0.01).name('mouse o')
+
+      const body = this.animation.morphingMeshes.find((m) => m.name === 'body')!
+      const eyelashes = this.animation.morphingMeshes.find((m) => m.name === 'eyelashes')!
+
+      const eyelashesProgress = (eyeProgress: number) => {
+        const threshold = 0.6
+        return eyeProgress < threshold ? 0 : (eyeProgress - threshold) / (1 - threshold)
       }
+
+      folder
+        .add(body.morphTargetInfluences!, '0', 0, 1, 0.01)
+        .name('eye left')
+        .onChange((p: number) => {
+          eyelashes.morphTargetInfluences![0] = eyelashesProgress(p)
+        })
+      folder
+        .add(body.morphTargetInfluences!, '1', 0, 1, 0.01)
+        .name('eye right')
+        .onChange((p: number) => {
+          eyelashes.morphTargetInfluences![1] = eyelashesProgress(p)
+        })
+      folder.add(body.morphTargetInfluences!, '2', 0, 1, 0.01).name('mouse a')
+      folder.add(body.morphTargetInfluences!, '3', 0, 1, 0.01).name('mouse o')
     }
   }
 
