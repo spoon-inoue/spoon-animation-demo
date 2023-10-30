@@ -226,38 +226,38 @@ export class Canvas {
           tl.to(morph, { eye: 1, duration: 0.08 })
           tl.to(morph, { eye: 0, duration: 0.08, delay: 0.1 })
         },
-        mouse_a: 0,
-        mouse_u: 0,
-        mouseAnime: () => {
+        mouth_a: 0,
+        mouth_u: 0,
+        mouthAnime: () => {
           const tl = gsap.timeline({
             repeat: 3,
             defaults: {
               ease: 'none',
             },
             onUpdate: () => {
-              body.morphTargetInfluences![2] = morph.mouse_a
+              body.morphTargetInfluences![2] = morph.mouth_a
             },
             onRepeat: () => {
-              const prev = morph.mouse_u
+              const prev = morph.mouth_u
               for (let i = 0; i < 10; i++) {
-                morph.mouse_u = [0, 0.3, 0.6, 0.9][Math.floor(Math.random() * 4)]
-                if (prev !== morph.mouse_u) break
+                morph.mouth_u = [0, 0.3, 0.6, 0.9][Math.floor(Math.random() * 4)]
+                if (prev !== morph.mouth_u) break
               }
-              body.morphTargetInfluences![3] = morph.mouse_u
+              body.morphTargetInfluences![3] = morph.mouth_u
             },
             onComplete: () => {
               gsap.to(morph, {
-                mouse_u: 0,
+                mouth_u: 0,
                 duration: 0.05,
                 ease: 'none',
                 onUpdate: () => {
-                  body.morphTargetInfluences![3] = morph.mouse_u
+                  body.morphTargetInfluences![3] = morph.mouth_u
                 },
               })
             },
           })
-          tl.to(morph, { mouse_a: 1, duration: 0.07 }, '<')
-          tl.to(morph, { mouse_a: 0, duration: 0.07 })
+          tl.to(morph, { mouth_a: 1, duration: 0.07 }, '<')
+          tl.to(morph, { mouth_a: 0, duration: 0.07 })
         },
       }
 
@@ -273,22 +273,22 @@ export class Canvas {
       folder.add(morph, 'eyeAnime')
 
       folder
-        .add(morph, 'mouse_a', 0, 1, 0.01)
-        .name('mouse a')
+        .add(morph, 'mouth_a', 0, 1, 0.01)
+        .name('mouth a')
         .onChange((p: number) => {
           body.morphTargetInfluences![2] = p
         })
         .listen()
 
       folder
-        .add(morph, 'mouse_u', 0, 1, 0.01)
-        .name('mouse u')
+        .add(morph, 'mouth_u', 0, 1, 0.01)
+        .name('mouth u')
         .onChange((p: number) => {
           body.morphTargetInfluences![3] = p
         })
         .listen()
 
-      folder.add(morph, 'mouseAnime')
+      folder.add(morph, 'mouthAnime')
     }
   }
 
