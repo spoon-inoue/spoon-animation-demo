@@ -90,21 +90,28 @@ export class Canvas {
 
   private createLights() {
     three.scene.add(this.lights)
+    {
+      const ambient = new THREE.AmbientLight()
+      ambient.intensity = 1
+      this.lights.add(ambient)
+    }
+    {
+      const directional = new THREE.DirectionalLight('#fff', 1)
+      directional.position.set(3, 4, 5)
+      directional.castShadow = true
+      directional.shadow.mapSize.set(2048, 2048)
+      directional.shadow.camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 15)
+      this.lights.add(directional)
 
-    const ambient = new THREE.AmbientLight()
-    ambient.intensity = 1
-    this.lights.add(ambient)
+      const helper = new THREE.CameraHelper(directional.shadow.camera)
+      this.helpers.add(helper)
+    }
 
-    const directional = new THREE.DirectionalLight('#fff', 1)
-    directional.position.set(3, 4, 5)
-    directional.castShadow = true
-    directional.shadow.mapSize.set(2048, 2048)
-    directional.shadow.camera = new THREE.OrthographicCamera(-5, 5, 5, -5, 0.1, 15)
-    this.lights.add(directional)
-
-    const helper = new THREE.CameraHelper(directional.shadow.camera)
-    this.helpers.add(helper)
-    // three.scene.add(helper)
+    {
+      const directional = new THREE.DirectionalLight('#fff', 0.5)
+      directional.position.set(0, 0, 5)
+      three.scene.add(directional)
+    }
   }
 
   private createModel(gltf: GLTF, textures: THREE.Texture[]) {
@@ -216,24 +223,72 @@ export class Canvas {
               eyelashes.morphTargetInfluences![0] = 1 - eyelashesProgress(morph.eye)
             },
           })
-          tl.to(morph, { eye: 1, duration: 0.1 })
-          tl.to(morph, { eye: 0, duration: 0.1, delay: 0.1 })
+          tl.to(morph, { eye: 1, duration: 0.08 })
+          tl.to(morph, { eye: 0, duration: 0.08, delay: 0.1 })
+        },
+        mouse_a: 0,
+        mouse_u: 0,
+        mouseAnime: () => {
+          const tl = gsap.timeline({
+            repeat: 3,
+            defaults: {
+              ease: 'none',
+            },
+            onUpdate: () => {
+              body.morphTargetInfluences![2] = morph.mouse_a
+            },
+            onRepeat: () => {
+              const prev = morph.mouse_u
+              for (let i = 0; i < 10; i++) {
+                morph.mouse_u = [0, 0.3, 0.6, 0.9][Math.floor(Math.random() * 4)]
+                if (prev !== morph.mouse_u) break
+              }
+              body.morphTargetInfluences![3] = morph.mouse_u
+            },
+            onComplete: () => {
+              gsap.to(morph, {
+                mouse_u: 0,
+                duration: 0.05,
+                ease: 'none',
+                onUpdate: () => {
+                  body.morphTargetInfluences![3] = morph.mouse_u
+                },
+              })
+            },
+          })
+          tl.to(morph, { mouse_a: 1, duration: 0.07 }, '<')
+          tl.to(morph, { mouse_a: 0, duration: 0.07 })
         },
       }
 
       folder
         .add(morph, 'eye', 0, 1, 0.01)
-        .listen()
         .onChange((p: number) => {
           body.morphTargetInfluences![0] = p
           body.morphTargetInfluences![1] = p
           eyelashes.morphTargetInfluences![0] = 1 - eyelashesProgress(p)
         })
+        .listen()
 
       folder.add(morph, 'eyeAnime')
 
-      folder.add(body.morphTargetInfluences!, '2', 0, 1, 0.01).name('mouse a')
-      folder.add(body.morphTargetInfluences!, '3', 0, 1, 0.01).name('mouse o')
+      folder
+        .add(morph, 'mouse_a', 0, 1, 0.01)
+        .name('mouse a')
+        .onChange((p: number) => {
+          body.morphTargetInfluences![2] = p
+        })
+        .listen()
+
+      folder
+        .add(morph, 'mouse_u', 0, 1, 0.01)
+        .name('mouse u')
+        .onChange((p: number) => {
+          body.morphTargetInfluences![3] = p
+        })
+        .listen()
+
+      folder.add(morph, 'mouseAnime')
     }
   }
 
