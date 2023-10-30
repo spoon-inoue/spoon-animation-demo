@@ -20,6 +20,7 @@
     "vite-plugin-glsl": "^1.1.2"
   },
   "dependencies": {
+    "gsap": "^3.12.2",
     "lil-gui": "^0.18.2",
     "three": "^0.156.1"
   }

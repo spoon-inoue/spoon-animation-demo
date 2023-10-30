@@ -3,6 +3,7 @@ import { three } from './core/Three'
 import { GLTF, GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 // import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { gui } from './Gui'
+import gsap from 'gsap'
 
 export class Canvas {
   private animation: { mixer?: THREE.AnimationMixer; actions?: { name: string; action: THREE.AnimationAction }[]; morphingMeshes: THREE.Mesh[] } = {
@@ -201,18 +202,36 @@ export class Canvas {
         return eyeProgress < threshold ? 0 : (eyeProgress - threshold) / (1 - threshold)
       }
 
+      const morph = {
+        eye: 0,
+        eyeAnime: () => {
+          const tl = gsap.timeline({
+            repeat: 1,
+            defaults: {
+              ease: 'none',
+            },
+            onUpdate: () => {
+              body.morphTargetInfluences![0] = morph.eye
+              body.morphTargetInfluences![1] = morph.eye
+              eyelashes.morphTargetInfluences![0] = 1 - eyelashesProgress(morph.eye)
+            },
+          })
+          tl.to(morph, { eye: 1, duration: 0.1 })
+          tl.to(morph, { eye: 0, duration: 0.1, delay: 0.1 })
+        },
+      }
+
       folder
-        .add(body.morphTargetInfluences!, '0', 0, 1, 0.01)
-        .name('eye left')
+        .add(morph, 'eye', 0, 1, 0.01)
+        .listen()
         .onChange((p: number) => {
-          eyelashes.morphTargetInfluences![0] = eyelashesProgress(p)
+          body.morphTargetInfluences![0] = p
+          body.morphTargetInfluences![1] = p
+          eyelashes.morphTargetInfluences![0] = 1 - eyelashesProgress(p)
         })
-      folder
-        .add(body.morphTargetInfluences!, '1', 0, 1, 0.01)
-        .name('eye right')
-        .onChange((p: number) => {
-          eyelashes.morphTargetInfluences![1] = eyelashesProgress(p)
-        })
+
+      folder.add(morph, 'eyeAnime')
+
       folder.add(body.morphTargetInfluences!, '2', 0, 1, 0.01).name('mouse a')
       folder.add(body.morphTargetInfluences!, '3', 0, 1, 0.01).name('mouse o')
     }
