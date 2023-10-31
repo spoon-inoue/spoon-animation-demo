@@ -211,7 +211,7 @@ export class Canvas {
 
       const morph = {
         eye: 0,
-        eyeAnime: () => {
+        blink: () => {
           const tl = gsap.timeline({
             repeat: 1,
             defaults: {
@@ -228,7 +228,7 @@ export class Canvas {
         },
         mouth_a: 0,
         mouth_u: 0,
-        mouthAnime: () => {
+        speak: () => {
           const tl = gsap.timeline({
             repeat: 3,
             defaults: {
@@ -270,7 +270,7 @@ export class Canvas {
         })
         .listen()
 
-      folder.add(morph, 'eyeAnime')
+      folder.add(morph, 'blink')
 
       folder
         .add(morph, 'mouth_a', 0, 1, 0.01)
@@ -288,7 +288,7 @@ export class Canvas {
         })
         .listen()
 
-      folder.add(morph, 'mouthAnime')
+      folder.add(morph, 'speak')
     }
   }
 
